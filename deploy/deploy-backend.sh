@@ -1,10 +1,25 @@
 #! /bin/bash
 
+
+functin add_newuser() {
+	 printf "***************************************************\n\t\tAdding new user \n***************************************************\n"
+	 adduser airflow
+	 
+	 # provide password, name, number others
+	 
+	 usermod -aG sudo airflow
+	 
+	 # switch to new user
+	 su - airflow    
+	 
+}
 function initialize_worker() {
     printf "***************************************************\n\t\tSetting up host \n***************************************************\n"
     # Update packages
     echo ======= Updating packages ========
     sudo apt-get update
+	sudo apt-get install -y python3-pip
+    export AIRFLOW_GPL_UNIDECODE=yes
 
     echo ====== python verison ========
     python3 -v
@@ -16,7 +31,61 @@ function initialize_worker() {
 
     # Install pip3
     echo ======= Installing pip3 =======
-    sudo apt-get install -y python3-pip
+    
+
+
+    export AIRFLOW_GPL_UNIDECODE=yes
+    export AIRFLOW_HOME=~/airflow
+    sudo pip3 install apache-airflow
+
+    airflow initdb
+
+    sudo airflow webserver -p 8080 -D
+    sudo airflow scheduler -D
+	
+	
+	
+	sudo curl -o /etc/systemd/system/airflow-webserver.service https://raw.githubusercontent.com/apache/airflow/master/scripts/systemd/airflow-webserver.service
+	
+	sudo vi /etc/systemd/system/airflow-webserver.service
+	
+	# EnvironmentFile=/etc/sysconfig/airflow (comment out this line)
+	Environment="PATH=/home/airflow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+	ExecStart=/home/airflow/.local/bin/airflow webserver — pid /home/airflow/airflow-webserver.pid
+	
+	
+	
+	sudo curl -o /etc/systemd/system/airflow-scheduler.service https://raw.githubusercontent.com/apache/airflow/master/scripts/systemd/airflow-scheduler.service
+
+	sudo vi /etc/systemd/system/airflow-scheduler.service
+	
+	# EnvironmentFile=/etc/sysconfig/airflow (comment out this line)
+	Environment="PATH=/home/airflow/.local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
+	ExecStart=/home/airflow/.local/bin/airflow scheduler
+	
+	
+	
+	sudo systemctl daemon-reload
+	
+	sudo systemctl enable airflow-webserver
+	sudo systemctl enable airflow-scheduler
+	
+	sudo systemctl start airflow-webserver
+	sudo systemctl start airflow-scheduler
+	
+	sudo systemctl status airflow-webserver
+	sudo systemctl status airflow-scheduler
+	
+	sudo systemctl enable airflow-webserver
+	sudo systemctl enable airflow-scheduler
+	
+	sudo aws s3 cp s3://eks-doubledigit-aritifactory-eks-dev-us-east-1/airflow-api-0.0.1.jar . --region us-east-1
+	
+	sudo apt install openjdk-8-jdk
+	
+	java -Xms512m -Xmx1024m -jar airflow-api-0.0.1.jar > sysout.log 2>&1 & echo $!
+	
+	rm airflow-webserver-monitor.pid airflow-webserver.err
 }
 
 function setup_python_venv() {
@@ -37,7 +106,7 @@ function clone_app_repository() {
     echo ======== Cloning and accessing project directory ========
     if [[ -d ~/yummy-rest ]]; then
         sudo rm -rf ~/yummy-rest
-        git clone -b develop https://github.com/indungu/yummy-rest.git ~/yummy-rest
+        git clone -b master https://github.com/vivek22117/flask-rest-api.git ~/flask-rest-api
         cd ~/yummy-rest/
     else
         git clone -b develop https://github.com/indungu/yummy-rest.git ~/yummy-rest
@@ -58,10 +127,8 @@ function setup_app() {
 function setup_env() {
     echo ======= Exporting the necessary environment variables ========
     sudo cat > ~/.env << EOF
-    export DATABASE_URL="postgres://budufkitteymek:095f0029056c313190744c68ca69d19a2e315483bc41e059b40d6d9fdccf2599@ec2-107-22-229-213.compute-1.amazonaws.com:5432/d2r8p5ai580nqq"
     export DYNAMODB_TABLE="productManuals"
     export APP_CONFIG="production"
-    export SECRET_KEY="mYd3rTyL!tTl#sEcR3t"
     export FLASK_APP=run.py
 EOF
     echo ======= Exporting the necessary environment variables ========
@@ -85,12 +152,12 @@ function setup_nginx() {
             listen 80;
             listen [::]:80;
 
-            server_name api.doubledigit-solutions.com;
+            server_name localhost;
 
             location / {
                     # reverse proxy and serve the src
                     # running on the localhost:8000
-                    proxy_pass http://127.0.0.1:2244/;
+                    proxy_pass http://127.0.0.1:5000/;
                     proxy_set_header HOST \$host;
                     proxy_set_header X-Forwarded-Proto \$scheme;
                     proxy_set_header X-Real-IP \$remote_addr;
@@ -114,7 +181,7 @@ function create_launch_script () {
 
     sudo cat > /home/ubuntu/launch.sh <<EOF
     #!/bin/bash
-    cd ~/yummy-rest
+    cd ~/flask-rest-api
     source ~/.env
     source ~/venv/bin/activate
     gunicorn app:APP -D
