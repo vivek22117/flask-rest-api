@@ -20,7 +20,7 @@ ENDPOINT = "mydaxcluster.lxh32w.clustercfg.dax.euw1.cache.amazonaws.com:8111"
 
 
 def createClient(region):
-    if environ.get('IS_RUNNING_LOCAL') is False:
+    if environ.get('IS_RUNNING_LOCAL') is 'false':
         return boto3.client('dynamodb', region_name=region)
     else:
         logging.info('using profile {}'.format(PROFILE))

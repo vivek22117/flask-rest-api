@@ -7,7 +7,7 @@ database_url = os.environ.get('DATABASE_URL', 'postgresql://localhost/')
 database_name = os.environ.get('DATABASE_NAME', 'doubledigit_db')
 dynamodb_table = os.environ.get('DYNAMODB_TABLE', 'productManuals')
 dynamodb_gl_index = os.environ.get('GLOBAL_INDEX', 'pfamily-contenttype-index')
-running_in_local = os.environ.get('IS_RUNNING_LOCAL', False)
+running_in_local = os.environ.get('IS_RUNNING_LOCAL', 'false')
 
 
 class BaseConfig:
@@ -25,7 +25,7 @@ class DevelopmentConfig(BaseConfig):
     """Development configuration."""
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = database_url + database_name
-    IS_RUNNING_LOCAL = True
+    IS_RUNNING_LOCAL = 'true'
 
 
 class TestingConfig(BaseConfig):
@@ -34,7 +34,7 @@ class TestingConfig(BaseConfig):
     TESTING = True
     SQLALCHEMY_DATABASE_URI = database_url + database_name + '_test'
     PRESERVE_CONTEXT_ON_EXCEPTION = False
-    IS_RUNNING_LOCAL = True
+    IS_RUNNING_LOCAL = 'true'
 
 
 class ProductionConfig(BaseConfig):
