@@ -1,6 +1,7 @@
 """Main APP module"""
 import os
 from flask import Flask, make_response, jsonify
+from prometheus_flask_exporter import PrometheusMetrics
 
 # local import
 from instance.config import app_config
@@ -8,6 +9,7 @@ from instance.config import app_config
 # Get the instance config to use
 config_name = os.environ.get("APP_CONFIG", "production")
 app = Flask(__name__)
+metrics = PrometheusMetrics(app)
 app.config.from_object(app_config[config_name])
 
 

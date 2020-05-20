@@ -1,4 +1,4 @@
-from src import app
+from src import app, metrics
 
 import json
 import logging
@@ -24,8 +24,14 @@ DEFAULT_TABLE = "productManuals"
 # initialize flask
 ddb = db.createClient(REGION)
 
+by_path_counter = metrics.counter(
+    'by_path_counter', 'Request count by request paths',
+    labels={'path': lambda: request.path}
+)
+
 
 @app.route('/api/<string:version>/health', methods=['GET'])
+@by_path_counter
 def health(version):
     if version == CURRENT_VERSION:
         status = 200
@@ -37,6 +43,7 @@ def health(version):
 
 
 @app.route('/api/<string:version>/guides/<string:mtype>', methods=["GET"])
+@by_path_counter
 def getProductGuides(version, mtype):
     """get a list of product manuals and their S3 location"""
     if mtype in TABLE_MAPPER:
@@ -57,6 +64,7 @@ def getProductGuides(version, mtype):
 
 
 @app.route('/api/<string:version>/content/guides/<string:ctype>', methods=["GET"])
+@by_path_counter
 def getFamilyContent(version, ctype):
     """get a list of content types for a product family"""
     try:
