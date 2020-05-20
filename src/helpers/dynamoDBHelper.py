@@ -19,13 +19,16 @@ INDEX = "pfamily-contenttype-index"
 ENDPOINT = "mydaxcluster.lxh32w.clustercfg.dax.euw1.cache.amazonaws.com:8111"
 
 
+# def createClient(region):
+#     if environ.get('IS_RUNNING_LOCAL') is 'false':
+#         return boto3.client('dynamodb', region_name=region)
+#     else:
+#         logging.info('using profile {}'.format(PROFILE))
+#         session = boto3.Session(profile_name=PROFILE)
+#         return session.client('dynamodb', region_name=region)
+
 def createClient(region):
-    if environ.get('IS_RUNNING_LOCAL') is 'false':
-        return boto3.client('dynamodb', region_name=region)
-    else:
-        logging.info('using profile {}'.format(PROFILE))
-        session = boto3.Session(profile_name=PROFILE)
-        return session.client('dynamodb', region_name=region)
+    return boto3.client('dynamodb', region_name=region)
 
 
 def createDAXClient(region, endpoint):
