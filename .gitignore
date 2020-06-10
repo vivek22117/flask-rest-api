@@ -82,7 +82,7 @@ docs/_build/
 # PyBuilder
 target/
 
-deploy/*
+
 
 # Jupyter Notebook
 .ipynb_checkpoints
