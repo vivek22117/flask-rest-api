@@ -21,6 +21,7 @@ def lambda_handler(event, context):
         response = s3.get_object(Bucket=bucket, Key=key)
         print('got object {}'.format(key))
         try:
+            # key = ''
             url = s3.generate_presigned_url(ClientMethod='get_object', Params={'Bucket': bucket, 'Key': key})
             print("retrived pre-signed url:{}".format(url))
         except Exception as e:
