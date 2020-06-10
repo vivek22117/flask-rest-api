@@ -15,7 +15,7 @@ scrape_configs:
   - job_name: 'node-exporter-ria-monitoring'
     ec2_sd_configs:
       - region: us-east-1
-        profile: arn:aws:iam::102954369745:instance-profile/product-manual-ec2-role
+        profile: arn:aws:iam::{AWS_ACCOUNT}:instance-profile/product-manual-ec2-role
         port: 9100
         refresh_interval: 1m
     relabel_configs:
