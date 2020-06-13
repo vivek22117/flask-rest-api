@@ -125,3 +125,6 @@ mv /tmp/SiteMonitor.status.tmp $SITES_STATUS_FILE
 echo "* * * End of Health Check * * *"
 
 
+curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+unzip awscliv2.zip
+sudo ./aws/install

@@ -1,7 +1,7 @@
 #! /bin/bash
 
 
-functin add_newuser() {
+function add_newuser() {
 	 printf "***************************************************\n\t\tAdding new user \n***************************************************\n"
 	 adduser airflow
 	 
@@ -18,7 +18,7 @@ function initialize_worker() {
     # Update packages
     echo ======= Updating packages ========
     sudo apt-get update
-	sudo apt-get install -y python3-pip
+	  sudo apt-get install -y python3-pip
     export AIRFLOW_GPL_UNIDECODE=yes
 
     echo ====== python verison ========
